@@ -1,0 +1,48 @@
+{% extends 'weather/base.html' %}
+
+{% block title %}Прогноз погоды{% endblock %}
+
+{% block content %}
+    <h1>Прогноз температуры</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Показать прогноз</button>
+    </form>
+
+    {% if labels and temperatures %}
+        <canvas id="forecastChart" width="400" height="200"></canvas>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            const ctx = document.getElementById('forecastChart').getContext('2d');
+            const labels = {{ labels|safe }};
+            const temperatures = {{ temperatures|safe }};
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Температура (°C)',
+                        data: temperatures,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        fill: true,
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Время' },
+                        },
+                        y: {
+                            title: { display: true, text: 'Температура (°C)' },
+                        }
+                    }
+                }
+            });
+        </script>
+    {% else %}
+        <p style="color: red;">Данные для графика недоступны. Проверьте ввод или повторите попытку позже.</p>
+    {% endif %}
+{% endblock %}

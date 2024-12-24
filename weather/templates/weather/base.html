@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Weather App{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul style="list-style: none; padding: 0; display: flex; gap: 1rem; background: #0078d7; padding: 1rem;">
+                <li><a href="/" style="color: white; text-decoration: none;">Главная</a></li>
+                <li><a href="{% url 'weather_by_city' %}" style="color: white; text-decoration: none;">Поиск по городу</a></li>
+                <li><a href="{% url 'weather_by_coordinates' %}" style="color: white; text-decoration: none;">Поиск по координатам</a></li>
+                <li><a href="{% url 'forecast' %}" style="color: white; text-decoration: none;">График</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'history' %}" style="color: white; text-decoration: none;">История запросов</a></li>
+                    <li>
+                        <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" style="background: none; border: none; color: white; cursor: pointer;">Выход</button>
+                        </form>
+                    </li>
+                {% else %}
+                    <li><a href="{% url 'login' %}" style="color: white; text-decoration: none;">Вход</a></li>
+                    <li><a href="{% url 'register' %}" style="color: white; text-decoration: none;">Регистрация</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+    
+    
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    <footer>
+        <p>&copy; 2024 Weather App</p>
+    </footer>
+</body>
+</html>

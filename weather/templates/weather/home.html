@@ -1,0 +1,13 @@
+{% extends 'weather/base.html' %}
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+    <h1 style="text-align: center;">Добро пожаловать в Weather App</h1>
+    <p style="text-align: center;">Выберите способ поиска погоды или посмотрите график.</p>
+    <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 2rem;">
+        <a href="{% url 'weather_by_city' %}" style="padding: 1rem 2rem; background: #0078d7; color: white; text-decoration: none; border-radius: 8px;">Поиск по городу</a>
+        <a href="{% url 'weather_by_coordinates' %}" style="padding: 1rem 2rem; background: #0078d7; color: white; text-decoration: none; border-radius: 8px;">Поиск по координатам</a>
+        <a href="{% url 'forecast' %}" style="padding: 1rem 2rem; background: #0078d7; color: white; text-decoration: none; border-radius: 8px;">График</a>
+    </div>
+{% endblock %}

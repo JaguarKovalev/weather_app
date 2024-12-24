@@ -1,0 +1,28 @@
+{% extends 'weather/base.html' %}
+
+{% block title %}Поиск по городу{% endblock %}
+
+{% block content %}
+    <h1>Погода по городу</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.city }}
+        <button type="submit">Узнать погоду</button>
+    </form>
+
+    {% if weather_data %}
+    {% if weather_data.error %}
+        <div style="color: red;">
+            <p>{{ weather_data.error }}</p>
+        </div>
+    {% else %}
+        <div style="text-align: center;">
+            <h2>Погода в {{ weather_data.city }}</h2>
+            <p><strong>Температура:</strong> {{ weather_data.temperature }}°C</p>
+            <p><strong>Описание:</strong> {{ weather_data.description }}</p>
+            <img src="{{ weather_data.icon }}" alt="Иконка погоды">
+        </div>
+    {% endif %}
+{% endif %}
+
+{% endblock %}

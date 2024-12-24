@@ -1,0 +1,25 @@
+{% extends 'weather/base.html' %}
+
+{% block title %}История запросов{% endblock %}
+
+{% block content %}
+    <h1>История запросов</h1>
+    {% if requests %}
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+        {% for req in requests %}
+            <div style="border: 1px solid #ccc; border-radius: 8px; padding: 1rem; width: 300px; background: #f9f9f9;">
+                <p><strong>Дата:</strong> {{ req.timestamp }}</p>
+                {% if req.city %}
+                    <p><strong>Город:</strong> {{ req.city }}</p>
+                {% else %}
+                    <p><strong>Координаты:</strong> {{ req.latitude }}, {{ req.longitude }}</p>
+                {% endif %}
+                <p><strong>Описание:</strong> {{ req.result.weather.0.description }}</p>
+                <p><strong>Температура:</strong> {{ req.result.main.temp }}°C</p>
+            </div>
+        {% endfor %}
+        </div>
+    {% else %}
+        <p>Запросов пока нет.</p>
+    {% endif %}
+{% endblock %}
