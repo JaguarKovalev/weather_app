@@ -53,6 +53,11 @@ def home(request):
     return render(request, 'weather/home.html')
 
 # Поиск погоды по городу
+from django.core.cache import cache
+
+# Закешированное представление
+from .models import WeatherRequest
+
 def weather_by_city(request):
     form = WeatherForm()
     weather_data = None
@@ -61,31 +66,39 @@ def weather_by_city(request):
         form = WeatherForm(request.POST)
         if form.is_valid():
             city = form.cleaned_data.get('city')
-            api_key = "482adb12c18eaf2ee9c6a2dac8e6c7b3"
-            url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric&lang=ru"
+            cache_key = f"weather_city_{city.lower()}"  # Ключ кэша
+            weather_data = cache.get(cache_key)  # Проверяем кэш
 
-            response = requests.get(url)
-            if response.status_code == 200:
-                data = response.json()
-                weather_data = {
-                    'city': data.get('name', 'Неизвестно'),
-                    'temperature': data['main']['temp'],
-                    'description': data['weather'][0]['description'],
-                    'icon': f"http://openweathermap.org/img/wn/{data['weather'][0]['icon']}@2x.png",
-                }
-                # Сохраняем запрос в базу данных, если пользователь авторизован
-                if request.user.is_authenticated:
-                    WeatherRequest.objects.create(
-                        user=request.user,
-                        city=city,
-                        result=data
-                    )
-            else:
-                weather_data = {'error': 'Не удалось получить данные. Проверьте ввод.'}
+            if not weather_data:  # Если данных в кэше нет
+                api_key = "482adb12c18eaf2ee9c6a2dac8e6c7b3"
+                url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric&lang=ru"
+                response = requests.get(url)
+
+                if response.status_code == 200:
+                    data = response.json()
+                    weather_data = {
+                        'city': data.get('name', 'Неизвестно'),
+                        'temperature': data['main']['temp'],
+                        'description': data['weather'][0]['description'],
+                        'icon': f"http://openweathermap.org/img/wn/{data['weather'][0]['icon']}@2x.png",
+                    }
+                    cache.set(cache_key, weather_data, 600)  # Сохраняем в кэш на 10 минут
+                else:
+                    weather_data = {'error': 'Не удалось получить данные. Проверьте ввод.'}
+
+            # Сохраняем запрос в базу данных
+            if request.user.is_authenticated:
+                WeatherRequest.objects.create(
+                    user=request.user,
+                    city=city,
+                    result=weather_data
+                )
 
     return render(request, 'weather/by_city.html', {'form': form, 'weather_data': weather_data})
 
-# Поиск погоды по координатам
+
+
+# не закешированное представление
 def weather_by_coordinates(request):
     form = WeatherForm()
     weather_data = None
@@ -102,7 +115,7 @@ def weather_by_coordinates(request):
             if response.status_code == 200:
                 data = response.json()
                 weather_data = {
-                    'city': data.get('name', 'Неизвестно'),
+                    'city': data.get('name', f"Координаты: {latitude}, {longitude}"),
                     'temperature': data['main']['temp'],
                     'description': data['weather'][0]['description'],
                     'icon': f"http://openweathermap.org/img/wn/{data['weather'][0]['icon']}@2x.png",
@@ -113,12 +126,13 @@ def weather_by_coordinates(request):
                         user=request.user,
                         latitude=latitude,
                         longitude=longitude,
-                        result=data
+                        result=weather_data
                     )
             else:
                 weather_data = {'error': 'Не удалось получить данные. Проверьте ввод.'}
 
     return render(request, 'weather/by_coordinates.html', {'form': form, 'weather_data': weather_data})
+
 
 # История запросов
 @login_required

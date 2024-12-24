@@ -14,8 +14,9 @@
                 {% else %}
                     <p><strong>Координаты:</strong> {{ req.latitude }}, {{ req.longitude }}</p>
                 {% endif %}
-                <p><strong>Описание:</strong> {{ req.result.weather.0.description }}</p>
-                <p><strong>Температура:</strong> {{ req.result.main.temp }}°C</p>
+                <p><strong>Описание:</strong> {{ req.result.description }}</p>
+                <p><strong>Температура:</strong> {{ req.result.temperature }}°C</p>
+                <img src="{{ req.result.icon }}" alt="Иконка погоды">
             </div>
         {% endfor %}
         </div>
